@@ -1,0 +1,42 @@
+rules_version = '2';
+
+// Règles Firestore de My Timetable
+// - Lecture : tout le monde (l'emploi du temps est consultable sans compte)
+// - Écriture : uniquement les comptes administrateurs listés ci-dessous
+//
+// ⚠️ Remplace l'adresse par celle du compte créé dans
+//    Firebase Console → Authentication → Utilisateurs.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['TON.EMAIL@exemple.fr'];
+    }
+
+    function isNamedItem() {
+      return request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80;
+    }
+
+    match /courses/{id}  { allow read: if true; allow delete: if isAdmin(); allow create, update: if isAdmin() && isNamedItem(); }
+    match /teachers/{id} { allow read: if true; allow delete: if isAdmin(); allow create, update: if isAdmin() && isNamedItem(); }
+    match /rooms/{id}    { allow read: if true; allow delete: if isAdmin(); allow create, update: if isAdmin() && isNamedItem(); }
+
+    // Une semaine = un document dont l'identifiant est la date du lundi (AAAA-MM-JJ)
+    match /weeks/{weekId} {
+      allow read: if true;
+      allow delete: if isAdmin();
+      allow create, update: if isAdmin()
+        && weekId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.sessions is list
+        && request.resource.data.sessions.size() <= 200;
+    }
+
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin() && id == 'general';
+    }
+  }
+}

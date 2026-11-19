@@ -1,0 +1,14 @@
+{
+  "name": "My Timetable",
+  "short_name": "Timetable",
+  "description": "Emploi du temps de la semaine",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f5fa",
+  "theme_color": "#4f46e5",
+  "icons": [
+    { "src": "assets/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
