@@ -24,6 +24,7 @@ Affichage des emplois du temps semaine par semaine, avec un espace **Gestion** p
 - Dupliquer une séance, ou la copier sur les N semaines suivantes
 - Dupliquer toute une semaine (semaine suivante, N semaines, ou une date précise ; remplacer ou ajouter)
 - Type de semaine : école, entreprise (alternance), examens, vacances + note de semaine
+- **Import depuis un PDF ou une photo** (même manuscrit) : chaque page est lue par l'IA Gemini (Firebase AI Logic), puis un écran de vérification affiche l'image à côté des séances détectées pour corriger avant d'importer. Les cours, profs et salles inconnus sont créés automatiquement. Sans IA (mode local), saisie manuelle à côté de l'image.
 - Paramètres : titre, heures de début/fin de journée, jours affichés, durée par défaut
 
 ## Mise en route
@@ -43,6 +44,8 @@ python3 -m http.server 8000   # puis ouvrir http://localhost:8000
 5. **Paramètres du projet → Vos applications → Web (`</>`)** → enregistre l'appli, copie l'objet `firebaseConfig` dans `js/firebase-config.js`.
 6. **Firestore → Règles** : colle le contenu de `firestore.rules` en remplaçant `TON.EMAIL@exemple.fr` par l'e-mail du compte créé à l'étape 3, puis **Publier**.
 7. **Authentication → Paramètres → Domaines autorisés** : ajoute `kmauger18.github.io`.
+
+8. Pour l'import PDF/photo : **AI Logic → Commencer → Gemini Developer API** (offre sans frais) → Activer l'API. Firebase impose App Check sur AI Logic : l'appli Web est enregistrée dans **App Check** avec le fournisseur *Fraud Defense (reCAPTCHA Enterprise)* et la clé de site `appCheckSiteKey` de `js/firebase-config.js` (domaines `kmauger18.github.io` et `localhost`).
 
 Tout reste dans le forfait gratuit **Spark**.
 
