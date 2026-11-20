@@ -111,24 +111,33 @@ class FirebaseStore {
       this.ai = this.aiM.getAI(this.app, { backend: new this.aiM.GoogleAIBackend() });
     }
     let lastErr;
-    for (const model of AI_MODELS) {
+    for (const { model, timeout } of AI_MODELS) {
       try {
         const m = this.aiM.getGenerativeModel(this.ai, {
           model, generationConfig: { responseMimeType: 'application/json', temperature: 0 },
-        });
-        const res = await m.generateContent([prompt, { inlineData: { data: image.data, mimeType: image.mime } }]);
+        }, { timeout });
+        const res = await Promise.race([
+          m.generateContent([prompt, { inlineData: { data: image.data, mimeType: image.mime } }]),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeout + 2000)),
+        ]);
         return res.response.text();
       } catch (e) {
         lastErr = e;
-        // modèle inconnu / retiré → on essaie le suivant
-        if (!/not.?found|404|not supported|unsupported|deprecated|retired/i.test(String(e?.message || e))) throw e;
+        console.warn('Modèle IA indisponible :', model, e?.message);
+        // modèle retiré, surchargé ou trop lent → on essaie le suivant
+        if (!/not.?found|404|not supported|unsupported|deprecated|retired|no longer available|50[0-9]|high demand|overloaded|unavailable|timeout|timed out|abort|429|quota|exhausted/i.test(String(e?.message || e))) throw e;
       }
     }
     throw lastErr;
   }
 }
 
-const AI_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
+// Du plus précis au plus disponible. Les modèles « latest » suivent automatiquement les nouvelles versions.
+const AI_MODELS = [
+  { model: 'gemini-3.8-flash', timeout: 35000 },
+  { model: 'gemini-flash-lite-latest', timeout: 60000 },
+  { model: 'gemini-flash-latest', timeout: 60000 },
+];
 
 /* ───────────────────────── Local (démo) ───────────────────────── */
 const LOCAL_KEY = 'mytimetable:v1';
