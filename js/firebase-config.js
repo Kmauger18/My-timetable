@@ -11,10 +11,10 @@
 //  règles Firestore (fichier firestore.rules).
 // ─────────────────────────────────────────────────────────────
 export const firebaseConfig = {
-  apiKey: "A_REMPLACER",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyAYhnp9OlCTgkxgkZy7HPyLABf31xypGzM",
+  authDomain: "my-timetable-1b262.firebaseapp.com",
+  projectId: "my-timetable-1b262",
+  storageBucket: "my-timetable-1b262.firebasestorage.app",
+  messagingSenderId: "124648262930",
+  appId: "1:124648262930:web:d8606b9a479c4ba33ff7cb"
 };
