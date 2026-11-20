@@ -1,7 +1,7 @@
 // Couche de données : Firebase (Auth + Firestore) ou stockage local de démo.
-import { firebaseConfig } from './firebase-config.js';
+import { firebaseConfig, appCheckSiteKey } from './firebase-config.js';
 
-const SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
+const SDK = 'https://www.gstatic.com/firebasejs/12.19.0/';
 
 export const isConfigured = Boolean(
   firebaseConfig.apiKey && !String(firebaseConfig.apiKey).startsWith('A_REMPLACER') && firebaseConfig.projectId
@@ -27,6 +27,16 @@ class FirebaseStore {
     this.fs = fsM;
     this.au = authM;
     const app = appM.initializeApp(firebaseConfig);
+    this.app = app;
+    if (appCheckSiteKey) {
+      try {
+        const acM = await import(SDK + 'firebase-app-check.js');
+        acM.initializeAppCheck(app, {
+          provider: new acM.ReCaptchaEnterpriseProvider(appCheckSiteKey),
+          isTokenAutoRefreshEnabled: true,
+        });
+      } catch (e) { console.warn('App Check non initialisé', e); }
+    }
     try {
       // Cache hors-ligne : l'emploi du temps reste consultable sans réseau.
       this.db = fsM.initializeFirestore(app, {
@@ -93,7 +103,32 @@ class FirebaseStore {
   }
   async logout() { await this.au.signOut(this.auth); }
   async resetPassword(email) { await this.au.sendPasswordResetEmail(this.auth, email); }
+
+  // Lecture d'une image par l'IA (Gemini via Firebase AI Logic).
+  async readImage(prompt, image) {
+    if (!this.aiM) {
+      this.aiM = await import(SDK + 'firebase-ai.js');
+      this.ai = this.aiM.getAI(this.app, { backend: new this.aiM.GoogleAIBackend() });
+    }
+    let lastErr;
+    for (const model of AI_MODELS) {
+      try {
+        const m = this.aiM.getGenerativeModel(this.ai, {
+          model, generationConfig: { responseMimeType: 'application/json', temperature: 0 },
+        });
+        const res = await m.generateContent([prompt, { inlineData: { data: image.data, mimeType: image.mime } }]);
+        return res.response.text();
+      } catch (e) {
+        lastErr = e;
+        // modèle inconnu / retiré → on essaie le suivant
+        if (!/not.?found|404|not supported|unsupported|deprecated|retired/i.test(String(e?.message || e))) throw e;
+      }
+    }
+    throw lastErr;
+  }
 }
+
+const AI_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
 
 /* ───────────────────────── Local (démo) ───────────────────────── */
 const LOCAL_KEY = 'mytimetable:v1';
@@ -157,6 +192,12 @@ class LocalStore {
     this._emitAuth();
   }
   async resetPassword() { throw new Error('Indisponible en mode local'); }
+  async readImage(prompt, image) {
+    if (window.__mtAiMock) return window.__mtAiMock(prompt, image);
+    const err = new Error('Lecture automatique indisponible en mode local (Firebase non configuré).');
+    err.code = 'ai/local';
+    throw err;
+  }
 
   // Quelques données d'exemple pour découvrir l'appli.
   _seed() {
