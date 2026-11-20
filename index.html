@@ -59,6 +59,8 @@
     </div>
     <div class="admin-right">
       <button class="btn small primary" id="addSessionBtn">+ Séance</button>
+      <button class="btn small" id="importBtn" title="Importer des emplois du temps depuis un PDF ou une photo">Importer PDF / photo</button>
+      <input type="file" id="importFile" accept="application/pdf,image/*" multiple hidden>
       <button class="btn small" id="copyWeekBtn">Dupliquer la semaine</button>
       <button class="btn small" id="clearWeekBtn">Vider</button>
       <button class="btn small" id="libraryBtn">Cours · Profs · Salles</button>
@@ -190,6 +192,50 @@
       </div>
       <footer><span class="spacer"></span><button type="button" class="btn ghost" data-close>Annuler</button><button type="submit" class="btn primary">Dupliquer</button></footer>
     </form>
+  </dialog>
+
+  <!-- Import PDF / photo -->
+  <dialog id="importDialog" class="modal xl">
+    <div class="import">
+      <header><h2>Importer des emplois du temps</h2><button type="button" class="icon-btn" data-close aria-label="Fermer">×</button></header>
+      <p class="import-status" id="importStatus"><span class="spinner"></span> Lecture des fichiers…</p>
+      <div id="importBody" hidden>
+        <div class="tabs" id="importTabs" role="tablist"></div>
+        <div class="import-grid">
+          <figure class="import-img">
+            <div class="import-img-wrap" id="importImgWrap"><img id="importImg" alt="Page importée"></div>
+            <figcaption><span id="importImgLabel"></span><button type="button" class="link" id="importZoom">Zoom</button></figcaption>
+          </figure>
+          <div class="import-side">
+            <div class="import-week">
+              <label class="field">Semaine (n'importe quel jour)<input type="date" id="importWeek"></label>
+              <span class="muted" id="importWeekInfo"></span>
+            </div>
+            <p class="import-msg" id="importMsg" hidden></p>
+            <div class="import-table-wrap">
+              <table class="import-table">
+                <colgroup><col style="width:66px"><col style="width:88px"><col style="width:88px"><col style="width:22%"><col style="width:22%"><col><col><col style="width:34px"></colgroup>
+                <thead><tr><th>Jour</th><th>Début</th><th>Fin</th><th>Cours</th><th>Prof</th><th>Salle</th><th>Note</th><th></th></tr></thead>
+                <tbody id="importRows"></tbody>
+              </table>
+            </div>
+            <div class="import-tools">
+              <button type="button" class="btn small" id="importAddRow">+ Ajouter une ligne</button>
+              <button type="button" class="btn small ghost" id="importRetry">↻ Relire la page avec l'IA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <datalist id="dlCourses"></datalist><datalist id="dlTeachers"></datalist><datalist id="dlRooms"></datalist>
+      <footer>
+        <label class="check">Si la semaine contient déjà des séances :
+          <select id="importMode"><option value="replace">les remplacer</option><option value="merge">ajouter</option></select>
+        </label>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" data-close>Annuler</button>
+        <button type="button" class="btn primary" id="importGo" disabled>Importer</button>
+      </footer>
+    </div>
   </dialog>
 
   <!-- Paramètres -->
