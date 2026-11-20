@@ -18,3 +18,7 @@ export const firebaseConfig = {
   messagingSenderId: "124648262930",
   appId: "1:124648262930:web:d8606b9a479c4ba33ff7cb"
 };
+
+// Clé de site reCAPTCHA (publique) utilisée par Firebase App Check,
+// obligatoire pour la lecture IA des PDF (Firebase AI Logic).
+export const appCheckSiteKey = "6LcomikuAAAAAP0DB3ioVfehmH44Gx-840yHoWZB";
