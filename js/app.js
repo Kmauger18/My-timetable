@@ -1,4 +1,5 @@
 import { createStore, newId } from './store.js';
+import { setupImporter } from './importer.js';
 
 /* ───────────────────────── Utilitaires ───────────────────────── */
 const $ = (s, r = document) => r.querySelector(s);
@@ -751,10 +752,11 @@ function bindUI() {
   $('#clearWeekBtn').onclick = clearWeek;
   $('#libraryBtn').onclick = () => { renderLibrary(); openDialog('#libraryDialog'); };
   $('#settingsBtn').onclick = openSettings;
+  setupImporter({ state, toast, errMsg, setMonday, isoWeek, newId, normalizeWeek });
 
   // Fermeture des dialogues
   document.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeDialog(e.target); });
-  $$('dialog').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
+  $$('dialog:not(#importDialog)').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); }));
 
   // Séance
   const sf = $('#sessionForm');
