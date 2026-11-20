@@ -1,6 +1,6 @@
 // Service worker : réseau d'abord, cache en secours (l'appli reste ouvrable hors-ligne).
-const CACHE = 'my-timetable-v1';
-const ASSETS = ['./', './index.html', './css/style.css', './js/app.js', './js/store.js', './js/firebase-config.js', './assets/logo.svg', './manifest.webmanifest'];
+const CACHE = 'my-timetable-v2';
+const ASSETS = ['./js/importer.js', './', './index.html', './css/style.css', './js/app.js', './js/store.js', './js/firebase-config.js', './assets/logo.svg', './manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
